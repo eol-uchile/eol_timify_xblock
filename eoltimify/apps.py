@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.apps import AppConfig
 from openedx.core.djangoapps.plugins.constants import PluginSettings, PluginURLs, ProjectType, SettingsType
 
 
 class EolTimifyConfig(AppConfig):
-    name = u'eoltimify'
+    name = 'eoltimify'
 
     plugin_app = {
         PluginSettings.CONFIG: {
             ProjectType.CMS: {
                 SettingsType.COMMON: {
-                    PluginSettings.RELATIVE_PATH: u'settings.common'},
+                    PluginSettings.RELATIVE_PATH: 'settings.common'},
             },
             ProjectType.LMS: {
                 SettingsType.COMMON: {
-                    PluginSettings.RELATIVE_PATH: u'settings.common'},
+                    PluginSettings.RELATIVE_PATH: 'settings.common'},
             },
         }}
 

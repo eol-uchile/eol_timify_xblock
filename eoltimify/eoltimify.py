@@ -4,7 +4,6 @@ import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
 import requests
-import unidecode
 import logging
 import json
 from six import text_type
@@ -124,7 +123,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Return student's link
         """
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         try:
             student_module = StudentModule.objects.get(
                 student_id=student_id,
@@ -145,7 +144,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
             StudentModule: A StudentModule object
         """
         # pylint: disable=no-member
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         student_module, created = StudentModule.objects.get_or_create(
             course_id=self.course_id,
             module_state_key=self.location,
@@ -527,7 +526,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
 
     def get_idform(self):
         connectsid, apiKey = self.get_api_token()
-        list_form = []
+        list_form = [connectsid, apiKey]
         if connectsid is not False:
 
             result = requests.get(

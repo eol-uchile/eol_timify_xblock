@@ -1,8 +1,6 @@
 """
 Module To Test EolTimify XBlock
 """
-from openedx.core.lib.tests.tools import assert_true
-
 from django.test import TestCase, Client
 from collections import namedtuple
 from mock import MagicMock, Mock, patch
@@ -113,7 +111,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         data = json.dumps({'display_name': 'testname',
                            "duration": '200',
                            "autoclose": 'No',
-                           "idform": '11223344'})
+                           "idform": '11223344'}).encode()
         request.body = data
         response = self.xblock.studio_submit(request)
         self.assertEqual(self.xblock.display_name, 'testname')
@@ -125,7 +123,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.xmodule_runtime.user_is_staff = True
 
         response = self.xblock.student_view()
-        assert_true('name="show"' in response.content)
+        self.assertTrue('name="show"' in response.content)
 
     @override_settings(TIMIFY_USER="")
     @override_settings(TIMIFY_PASSWORD="")
@@ -133,12 +131,12 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.xmodule_runtime.user_is_staff = False
 
         response = self.xblock.student_view()
-        assert_true('Sin Datos' in response.content)
+        self.assertTrue('Sin Datos' in response.content)
 
     @override_settings(TIMIFY_USER="")
     @override_settings(TIMIFY_PASSWORD="")
     def test_student_user_view_no_setting(self):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = False
         self.xblock.scope_ids.user_id = self.student.id
@@ -151,14 +149,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module.save()
 
         response = self.xblock.student_view()
-        assert_true('Sin Datos' in response.content)
+        self.assertTrue('Sin Datos' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             200, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -189,9 +187,9 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         response = self.xblock.student_view()
         state = StudentModule.objects.get(pk=module.id)
         self.assertEqual(
-            state.state,
-            '{"name_link": "test", "id_link": "1", "score": "Sin Registros", "link": "testhash", "id_form": "11223344", "expired": null}')
-        assert_true(
+            json.loads(state.state),
+            json.loads('{"name_link": "test", "id_link": "1", "score": "Sin Registros", "link": "testhash", "id_form": "11223344", "expired": null}'))
+        self.assertTrue(
             'href=https://timify.me/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
@@ -199,7 +197,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_post_1_400(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             200, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -229,14 +227,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
 
-        assert_true('Sin Datos' in response.content)
+        self.assertTrue('Sin Datos' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_post_2_400(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             200, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -266,14 +264,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
 
-        assert_true('Sin Datos' in response.content)
+        self.assertTrue('Sin Datos' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_get_1_400(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             400, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -303,14 +301,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
 
-        assert_true('Sin Datos' in response.content)
+        self.assertTrue('Sin Datos' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_with_module_state_finished(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
@@ -349,15 +347,15 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
 
-        assert_true('<label>Puntaje: 2</label>' in response.content)
-        assert_true('id="finished"' in response.content)
+        self.assertTrue('<label>Puntaje: 2</label>' in response.content)
+        self.assertTrue('id="finished"' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_with_module_state(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
@@ -395,7 +393,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module.save()
 
         response = self.xblock.student_view()
-        assert_true(
+        self.assertTrue(
             'href=https://timify.me/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
@@ -403,7 +401,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_student_user_view_with_different_id_form(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
@@ -441,7 +439,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module.save()
 
         response = self.xblock.student_view()
-        assert_true(
+        self.assertTrue(
             'href=https://timify.me/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
@@ -452,7 +450,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
             self,
             get,
             post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             200, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -480,8 +478,8 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         with mock.patch('eoltimify.eoltimify.EolTimifyXBlock.is_past_due', return_value=True):
             response = self.xblock.student_view()
 
-        assert_true('id="expired"' in response.content)
-        assert_true('Formulario no realizado' in response.content)
+        self.assertTrue('id="expired"' in response.content)
+        self.assertTrue('Formulario no realizado' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
@@ -489,7 +487,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.get')
     def test_student_user_view_with_false_past_due_form_completed(
             self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(
             200, json.dumps({"session": {"api_token": "test_token"}}))]
         post.side_effect = [
@@ -517,8 +515,8 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module.save()
         with mock.patch('eoltimify.eoltimify.EolTimifyXBlock.is_past_due', return_value=True):
             response = self.xblock.student_view()
-        assert_true('id="expired"' in response.content)
-        assert_true('<label>Puntaje: 2</label>' in response.content)
+        self.assertTrue('id="expired"' in response.content)
+        self.assertTrue('<label>Puntaje: 2</label>' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
@@ -558,23 +556,23 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
 
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         list_student = [[self.staff_user.id,
-                         u'staff_user',
-                         u'staff@edx.org',
-                         u'Sin Registros',
-                         u'Sin Registros',
-                         u'Sin Registros'],
+                         'staff_user',
+                         'staff@edx.org',
+                         'Sin Registros',
+                         'Sin Registros',
+                         'Sin Registros'],
                         [self.student.id,
-                         u'student',
-                         u'student@edx.org',
-                         u'Sin Registros',
-                         u'Sin Registros',
-                         u'Sin Registros']]
+                         'student',
+                         'student@edx.org',
+                         'Sin Registros',
+                         'Sin Registros',
+                         'Sin Registros']]
         self.assertEqual(data["list_student"], list_student)
         self.assertEqual(data["result"], "success")
 
@@ -605,10 +603,10 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         self.assertEqual(data["result"], "error")
 
     @override_settings(TIMIFY_USER="test")
@@ -627,10 +625,10 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         self.assertEqual(data["result"], "error")
 
     @override_settings(TIMIFY_USER="test")
@@ -649,10 +647,10 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         self.assertEqual(data["result"], "error")
 
     @override_settings(TIMIFY_USER="test")
@@ -683,10 +681,10 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         self.assertEqual(data["result"], "error2")
 
     @override_settings(TIMIFY_USER="test")
@@ -694,7 +692,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_staff_user_view_state_link(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         request = TestRequest()
         request.method = 'POST'
 
@@ -728,7 +726,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
 
         module = StudentModule(
@@ -746,19 +744,19 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module2.save()
 
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         list_student = [[self.staff_user.id,
-                         u'staff_user',
-                         u'staff@edx.org',
-                         u'test',
-                         u'Sin Registros',
-                         u'Sin Registros'],
+                         'staff_user',
+                         'staff@edx.org',
+                         'test',
+                         'Sin Registros',
+                         'Sin Registros'],
                         [self.student.id,
-                         u'student',
-                         u'student@edx.org',
-                         u'test',
-                         u'1',
-                         u'Sin Registros']]
+                         'student',
+                         'student@edx.org',
+                         'test',
+                         '1',
+                         'Sin Registros']]
         self.assertEqual(data["list_student"], list_student)
         self.assertEqual(data["result"], "success")
 
@@ -767,7 +765,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_staff_user_view_state_no_link(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         request = TestRequest()
         request.method = 'POST'
 
@@ -801,7 +799,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
 
         module = StudentModule(
@@ -819,19 +817,19 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         module2.save()
 
         response = self.xblock.show_score(request)
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         list_student = [[self.staff_user.id,
-                         u'staff_user',
-                         u'staff@edx.org',
-                         u'test',
-                         u'Sin Registros',
-                         u'Sin Registros'],
+                         'staff_user',
+                         'staff@edx.org',
+                         'test',
+                         'Sin Registros',
+                         'Sin Registros'],
                         [self.student.id,
-                         u'student',
-                         u'student@edx.org',
-                         u'test',
-                         u'1',
-                         u'Sin Registros']]
+                         'student',
+                         'student@edx.org',
+                         'test',
+                         '1',
+                         'Sin Registros']]
         self.assertEqual(data["list_student"], list_student)
         self.assertEqual(data["result"], "success")
 
@@ -840,7 +838,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_staff_user_view_with_datetime(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         request = TestRequest()
         request.method = 'POST'
 
@@ -874,7 +872,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
 
         module = StudentModule(
@@ -894,19 +892,19 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         with mock.patch('eoltimify.eoltimify.EolTimifyXBlock.expired_date', return_value=parse("2020-05-11T15:38:55.000Z")):
             response = self.xblock.show_score(request)
 
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         list_student = [[self.staff_user.id,
-                         u'staff_user',
-                         u'staff@edx.org',
-                         u'test',
-                         u'Sin Registros',
-                         u'Sin Registros'],
+                         'staff_user',
+                         'staff@edx.org',
+                         'test',
+                         'Sin Registros',
+                         'Sin Registros'],
                         [self.student.id,
-                         u'student',
-                         u'student@edx.org',
-                         u'test',
-                         u'1',
-                         u'No']]
+                         'student',
+                         'student@edx.org',
+                         'test',
+                         '1',
+                         'No']]
         self.assertEqual(data["list_student"], list_student)
         self.assertEqual(data["result"], "success")
 
@@ -915,7 +913,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
     @patch('requests.post')
     @patch('requests.get')
     def test_staff_user_view_with_datetime_late(self, get, post):
-        from courseware.models import StudentModule
+        from lms.djangoapps.courseware.models import StudentModule
         request = TestRequest()
         request.method = 'POST'
 
@@ -949,7 +947,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
         self.xblock.scope_ids.user_id = self.staff_user.id
-        data = '{}'
+        data = b'{}'
         request.body = data
 
         module = StudentModule(
@@ -969,18 +967,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         with mock.patch('eoltimify.eoltimify.EolTimifyXBlock.expired_date', return_value=parse("2020-05-11T15:36:55.000Z")):
             response = self.xblock.show_score(request)
 
-        data = json.loads(response.app_iter[0])
+        data = json.loads(response._app_iter[0].decode())
         list_student = [[self.staff_user.id,
-                         u'staff_user',
-                         u'staff@edx.org',
-                         u'test',
-                         u'Sin Registros',
-                         u'Sin Registros'],
+                         'staff_user',
+                         'staff@edx.org',
+                         'test',
+                         'Sin Registros',
+                         'Sin Registros'],
                         [self.student.id,
-                         u'student',
-                         u'student@edx.org',
-                         u'test',
-                         u'1',
-                         u'Si']]
+                         'student',
+                         'student@edx.org',
+                         'test',
+                         '1',
+                         'Si']]
         self.assertEqual(data["list_student"], list_student)
         self.assertEqual(data["result"], "success")
