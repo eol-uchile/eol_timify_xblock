@@ -1,0 +1,46 @@
+<div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
+    <ul class="list-input settings-list">
+      <li class="field comp-setting-entry is-set">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label" for="display_name">Display name</label>
+          <input class="input setting-input" name="display_name" id="display_name" value="{{xblock.display_name}}" type="text" />
+        </div>
+      </li>
+      <li class="field comp-setting-entry is-set">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label" for="timifyform">{{ idform.display_name }}</label>
+          <select name="timifyform" id="timifyform">
+              {% for option in idform.values %}
+              <option value="{{ option.value }}" {% if option.value == idform.value %}selected{% endif %}>{{ option.display_name }}</option>
+              {% endfor %}
+          </select>
+        </div>
+      </li>
+      <li class="field comp-setting-entry is-set">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label" for="duration">Duracion</label>
+          <input class="input setting-input" name="duration" id="duration"  min="0" value="{{ xblock.duration }}" type="number" />
+        </div>
+      </li>
+      <li class="field comp-setting-entry is-set">
+        <div class="wrapper-comp-setting">
+          <label class="label setting-label" for="timifyautoclose">Auto close</label>
+          <select name="timifyautoclose" id="timifyautoclose">
+              {% for option in field_autoclose.values %}
+              <option value="{{ option }}" {% if option == xblock.autoclose %}selected{% endif %}>{{ option }}</option>
+              {% endfor %}
+          </select>
+        </div>
+      </li>
+    </ul>
+    <div class="xblock-actions">
+      <ul>
+        <li class="action-item">
+          <a href="#" class="button action-primary save-button save-button-eoltimify">Guardar</a>
+        </li>
+        <li class="action-item">
+          <a href="#" class="button cancel-button cancel-button-eoltimify">Cancelar</a>
+        </li>        
+      </ul>
+    </div>
+</div>

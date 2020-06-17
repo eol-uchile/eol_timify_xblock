@@ -1,0 +1,50 @@
+<div class="eoltimify_block">
+   <h2>{{xblock.display_name}}</h2>
+   {% if is_course_staff %}
+      <div class="eoltimify_data_instructor">
+         <input type="button" name="show" value="Ver Puntaje" />
+      </div>
+      <div class="eoltimify_scores_instructor" style="visibility: hidden;">
+         <table style="text-align: center;margin-left:auto;margin-right:auto;">
+            <thead>
+                <tr>
+                  <td>Username</td>
+                  <td>Correo</td>
+                  <td>Nombre Test</td>
+                  <td>Puntaje</td>
+                  <td>Atrasado</td>
+                </tr>
+            </thead>
+            <tbody id="tabla-alumnos">
+            </tbody>
+        </table>
+      </div>
+      <div class="eoltimify_result_instructor"></div>
+      <div class="eoltimify_error_instructor" style="color: red;"></div>
+   {% else %}
+      {% if timify %}
+         {% if done %}
+            <label id="finished">Ya realizó este formulario</label></br>
+            <label>Puntaje: {{score}}</label></br>
+         {% else %}
+         <div class="eoltimify_result_student">
+            <a href={{link}} target="_blank"><button class="timify-button">Formulario</button></a></br>
+            <!--iframe src={{link}} title="Formulario" width="100%" height="450">
+             </iframe></br-->
+         </div>
+         {% endif %}
+      {% else %}
+         {% if expired %}
+            <label id="expired">El periodo de entrega ha finalizado</label></br>
+            {% if score != "None" %}
+               <label>Puntaje: {{score}}</label></br>
+            {% else %}
+               <label>Formulario no realizado</label></br>
+            {% endif %} 
+         {% else %}
+            Sin Datos</br>
+         {% endif %} 
+      {% endif %}         
+   {% endif %}
+   <div class="eoltimify_result"></div>
+</div>
