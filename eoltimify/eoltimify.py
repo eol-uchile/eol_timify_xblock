@@ -257,7 +257,6 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         context = {'xblock': self}
 
         if self.show_staff_grading_interface():
-            from dateutil.parser import parse
             context['is_course_staff'] = True
         else:
             context['id_form'] = self.idform
@@ -308,6 +307,9 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         return context
 
     def create_link(self, context, connectsid, apiKey, student_module, state):
+        """
+            Create user link
+        """
         from django.contrib.auth.models import User
         user_id = self.scope_ids.user_id
         id_form = self.idform
@@ -356,6 +358,10 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         return context
 
     def get_done(self, id_link, connectsid, apiKey):
+        """
+            Verify if the link was done
+            params: finishedAt is Datetime when link was done 
+        """
         id_form = self.idform
         result = requests.get(
             "https://timify.me/api/v1/~/Page/@id/" +
@@ -375,6 +381,9 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         return False
 
     def get_api_token(self):
+        """
+            Get connect.sid and api-key to access timify.me api
+        """
         data = cache.get("eol_timify-" + self.block_course_id + "-apikey")
         if data is None:
             connectsid = ""
@@ -411,7 +420,9 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
 
     @XBlock.json_handler
     def show_score(self, data, suffix=''):
-
+        """
+            Return a list with all score, finished date, email, name_link and username of the students
+        """
         pageId = self.idform
         user_id = self.scope_ids.user_id
         connectsid, apiKey = self.get_api_token()
@@ -525,6 +536,9 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         ]
 
     def get_idform(self):
+        """
+            Get all id form
+        """
         connectsid, apiKey = self.get_api_token()
         list_form = [connectsid, apiKey]
         if connectsid is not False:
