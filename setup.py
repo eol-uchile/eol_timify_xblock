@@ -26,7 +26,7 @@ def package_data(pkg, roots):
 setup(
     name='eoltimify',
     version='0.1',
-    description='XBlock list grade',
+    description='Eol Quilgo Xblock',
     license='AGPL v3',
     packages=[
         'eoltimify',

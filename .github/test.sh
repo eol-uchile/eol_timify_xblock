@@ -8,4 +8,4 @@ cd test_root/
 ln -s /openedx/staticfiles .
 
 cd /openedx/requirements/eol_timify_xblock/eoltimify
-DJANGO_SETTINGS_MODULE=lms.envs.test EDXAPP_TEST_MONGO_HOST=mongodb pytest tests.py::EolTimifyXBlockTestCase::test_student_user_view
+DJANGO_SETTINGS_MODULE=lms.envs.test EDXAPP_TEST_MONGO_HOST=mongodb pytest tests.py
