@@ -1,6 +1,6 @@
-# Eol Timify XBlock
+# Eol Quilgo XBlock
 
-XBlock and API to integrate timify with the Open edX LMS. Editable within Open edx Studio.
+XBlock and API to integrate quilgo(before timify) with the Open edX LMS. Editable within Open edx Studio.
 
 # Install
 
@@ -15,6 +15,7 @@ To enable Timify API Edit *production.py* in *lms and cms settings* and add timi
     
     TIMIFY_USER = ""
     TIMIFY_PASSWORD = ""
+    EOL_TIMIFY_TIME_CACHE = 300
     
 
 ## TESTS

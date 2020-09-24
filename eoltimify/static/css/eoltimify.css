@@ -210,3 +210,7 @@ table, th, td {
      box-shadow: none !important;
 }
 
+#timify_loading_ui{
+    box-shadow: none !important;
+}
+

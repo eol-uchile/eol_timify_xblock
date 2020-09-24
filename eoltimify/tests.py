@@ -96,7 +96,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
             CourseStaffRole(self.course.id).add_users(self.staff_user)
 
     def test_validate_field_data(self):
-        self.assertEqual(self.xblock.display_name, 'Eol Timify XBlock')
+        self.assertEqual(self.xblock.display_name, 'Eol Quilgo XBlock')
         self.assertEqual(self.xblock.duration, 120)
         self.assertEqual(self.xblock.autoclose, "Si")
         self.assertEqual(self.xblock.idform, "")
@@ -176,7 +176,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -202,7 +202,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
             json.loads(state.state),
             json.loads('{"name_link": "test", "id_link": "1", "score": "Sin Registros", "link": "testhash", "id_form": "11223344", "expired": null}'))
         self.assertTrue(
-            'href=https://timify.me/link/testhash ' in response.content)
+            'href=https://quilgo.com/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
@@ -218,9 +218,9 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         post.side_effect = [
             namedtuple(
                 "Request", [
-                    "status_code", "headers"])(
+                    "status_code", "headers", "content"])(
                 400, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}, 'error'), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -260,14 +260,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
-                            "status_code", "text"])(
+                            "status_code", "text", "content"])(
                                 400, json.dumps(
                                     {
                                         "links": [
                                             {
-                                                "id": 1, "hash": "testhash", "label": "test"}]}))]
+                                                "id": 1, "hash": "testhash", "label": "test"}]}), 'error')]
 
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = False
@@ -293,14 +293,14 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
             Test student view when get api-key fail
         """
         from lms.djangoapps.courseware.models import StudentModule
-        get.side_effect = [namedtuple("Request", ["status_code", "text"])(
-            400, json.dumps({"session": {"api_token": "test_token"}}))]
+        get.side_effect = [namedtuple("Request", ["status_code", "text", "content"])(
+            400, json.dumps({"session": {"api_token": "test_token"}}), 'error')]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -340,16 +340,16 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "hash": "testhash",
-                                                                                "label": "test",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "hash": "testhash",
+                                                                    "label": "test",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -390,16 +390,16 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "hash": "testhash",
-                                                                                "label": "test",
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "hash": "testhash",
+                                                                    "label": "test",
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -421,7 +421,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
         self.assertTrue(
-            'href=https://timify.me/link/testhash ' in response.content)
+            'href=https://quilgo.com/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
@@ -439,16 +439,16 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "hash": "testhash",
-                                                                                "label": "test",
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "hash": "testhash",
+                                                                    "label": "test",
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -470,7 +470,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
 
         response = self.xblock.student_view()
         self.assertTrue(
-            'href=https://timify.me/link/testhash ' in response.content)
+            'href=https://quilgo.com/link/testhash ' in response.content)
 
     @override_settings(TIMIFY_USER="test")
     @override_settings(TIMIFY_PASSWORD="test")
@@ -491,7 +491,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -531,7 +531,7 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -572,18 +572,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "score": "1",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"},
-                                                                               {"id": 2,
-                                                                                "score": None,
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "score": "1",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"},
+                                                                    {"id": 2,
+                                                                    "score": None,
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -631,9 +631,9 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         post.side_effect = [
             namedtuple(
                 "Request", [
-                    "status_code", "headers"])(
+                    "status_code", "headers", "content"])(
                 400, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}, 'error'), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -663,9 +663,9 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         request.method = 'POST'
 
         get.side_effect = [namedtuple("Request", ["status_code", "text"])(200, json.dumps({"session": {"api_token": "test_token"}})), namedtuple(
-            "Request", ["status_code", "text"])(400, json.dumps({"page": {"links": [{"id": 1, "score": "1"}, {"id": 2, "score": None}]}}))]
+            "Request", ["status_code", "text", "content"])(400, json.dumps({"page": {"links": [{"id": 1, "score": "1"}, {"id": 2, "score": None}]}}), 'error')]
         post.side_effect = [namedtuple("Request", ["status_code", "headers"])(
-            200, {'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'})]
+            200, {'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'})]
 
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
@@ -687,10 +687,10 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
         request = TestRequest()
         request.method = 'POST'
 
-        get.side_effect = [namedtuple("Request", ["status_code", "text"])(400, json.dumps({"session": {"api_token": "test_token"}})), namedtuple(
+        get.side_effect = [namedtuple("Request", ["status_code", "text", "content"])(400, json.dumps({"session": {"api_token": "test_token"}}), 'error'), namedtuple(
             "Request", ["status_code", "text"])(200, json.dumps({"page": {"links": [{"id": 1, "score": "1"}, {"id": 2, "score": None}]}}))]
         post.side_effect = [namedtuple("Request", ["status_code", "headers"])(
-            200, {'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'})]
+            200, {'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'})]
 
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
@@ -723,11 +723,9 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                                 "Request", [
                                     "status_code", "text"])(
                                         200, json.dumps(
-                                            {
-                                                "page": {
-                                                    "links": []}}))]
+                                            {"links": []}))]
         post.side_effect = [namedtuple("Request", ["status_code", "headers"])(
-            200, {'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'})]
+            200, {'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'})]
 
         self.xblock.idform = "11223344"
         self.xblock.xmodule_runtime.user_is_staff = True
@@ -757,18 +755,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "score": "1",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"},
-                                                                               {"id": 2,
-                                                                                "score": None,
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "score": "1",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"},
+                                                                    {"id": 2,
+                                                                    "score": None,
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -833,18 +831,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "score": "1",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"},
-                                                                               {"id": 2,
-                                                                                "score": None,
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "score": "1",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"},
+                                                                    {"id": 2,
+                                                                    "score": None,
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -909,18 +907,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "score": "1",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"},
-                                                                               {"id": 2,
-                                                                                "score": None,
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "score": "1",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"},
+                                                                    {"id": 2,
+                                                                    "score": None,
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(
@@ -987,18 +985,18 @@ class EolTimifyXBlockTestCase(UrlResetMixin, ModuleStoreTestCase):
                            namedtuple("Request",
                                       ["status_code",
                                        "text"])(200,
-                                                json.dumps({"page": {"links": [{"id": 1,
-                                                                                "score": "1",
-                                                                                "finishedAt": "2020-05-11T15:37:55.000Z"},
-                                                                               {"id": 2,
-                                                                                "score": None,
-                                                                                "finishedAt": None}]}}))]
+                                                json.dumps({"links": [{"id": 1,
+                                                                    "score": "1",
+                                                                    "finishedAt": "2020-05-11T15:37:55.000Z"},
+                                                                    {"id": 2,
+                                                                    "score": None,
+                                                                    "finishedAt": None}]}))]
         post.side_effect = [
             namedtuple(
                 "Request", [
                     "status_code", "headers"])(
                 200, {
-                    'Set-Cookie': 'Domain=timify.me; Path=/, connect.sid=test;'}), namedtuple(
+                    'Set-Cookie': 'Domain=quilgo.com; Path=/, connect.sid=test;'}), namedtuple(
                         "Request", [
                             "status_code", "text"])(
                                 200, json.dumps(

@@ -52,7 +52,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
     display_name = String(
         display_name="Display Name",
         help="Display name for this module",
-        default="Eol Timify XBlock",
+        default="Eol Quilgo XBlock",
         scope=Scope.settings,
     )
     duration = Integer(
@@ -289,7 +289,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                     context['done'] = self.get_done(
                         state['id_link'], connectsid, apiKey)
                     context['timify'] = True
-                    context['link'] = "https://timify.me/link/" + state['link']
+                    context['link'] = "https://quilgo.com/link/" + state['link']
                     context['name_link'] = state['name_link']
                     context['id_form'] = id_form
                     context['score'] = state['score']
@@ -328,7 +328,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
             "pageId": pageId}  # links=[{"text":"test1"},{"text":"test3"},{"text":"test4"}]
 
         result = requests.post(
-            "https://timify.me/api/v1/~/Link/bulk",
+            "https://quilgo.com/api/v1/~/Link/bulk",
             data=json.dumps(parameters),
             cookies={
                 'connect.sid': connectsid},
@@ -348,13 +348,14 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
             context['done'] = False
             student_module.state = json.dumps(state)
             student_module.save()
-            context['link'] = "https://timify.me/link/" + \
+            context['link'] = "https://quilgo.com/link/" + \
                 state['link']
             context['name_link'] = state['name_link']
             context['id_form'] = id_form
             context['score'] = state['score']
             context['late'] = "Sin Registros"
-
+        else:
+            log.error("Error in create link, user: {}, parameters: {}, response: {}".format(self.scope_ids.user_id, parameters, result.content))
         return context
 
     def get_done(self, id_link, connectsid, apiKey):
@@ -364,9 +365,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         """
         id_form = self.idform
         result = requests.get(
-            "https://timify.me/api/v1/~/Page/@id/" +
-            id_form +
-            "/with/Link",
+            "https://quilgo.com/api/v1/~/Link?formId={}&sortBy=createdAt".format(id_form),
             cookies={
                 'connect.sid': connectsid},
             headers={
@@ -375,14 +374,16 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
 
         if result.status_code == 200:
             datajson = json.loads(result.text)
-            for link in datajson["page"]["links"]:
+            for link in datajson["links"]:
                 if str(link['id']) == id_link:
                     return link['finishedAt'] is not None
+        else:
+            log.error("Error get all links of {} form_id, user_id: {}, response: {}".format(id_form, self.scope_ids.user_id, result.content))
         return False
 
     def get_api_token(self):
         """
-            Get connect.sid and api-key to access timify.me api
+            Get connect.sid and api-key to access quilgo.com api
         """
         data = cache.get("eol_timify-" + self.block_course_id + "-apikey")
         if data is None:
@@ -392,7 +393,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                     "username": DJANGO_SETTINGS.TIMIFY_USER,
                     "password": DJANGO_SETTINGS.TIMIFY_PASSWORD}
                 result = requests.post(
-                    "https://timify.me/api/v1/auth/ep",
+                    "https://quilgo.com/api/v1/auth/ep",
                     data=json.dumps(parameters),
                     headers={
                         'content-type': 'application/json'})
@@ -404,7 +405,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                             connectsid = aux_id[2]
 
                     result_api = requests.get(
-                        "https://timify.me/api/v1/~/Session",
+                        "https://quilgo.com/api/v1/~/Session",
                         cookies={
                             'connect.sid': connectsid},
                         headers={
@@ -414,6 +415,12 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                         cache_data = [connectsid, data["session"]["api_token"]]
                         cache.set("eol_timify-" + self.block_course_id + "-apikey", cache_data, DJANGO_SETTINGS.EOL_TIMIFY_TIME_CACHE)
                         return cache_data[0], cache_data[1]
+                    else:
+                        log.error("Error to get api-key, user_id: {}, response: {}".format(self.scope_ids.user_id, result_api.content))
+                else:
+                    log.error("Error to get connect.sid, user_id: {}, response: {}".format(self.scope_ids.user_id, result.content))
+            else:
+                log.error("TIMIFY_USER or TIMIFY_PASSWORD not configured, user_id: {}".format(self.scope_ids.user_id))
         else:
             return data[0], data[1]
         return False, False
@@ -427,11 +434,10 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
         user_id = self.scope_ids.user_id
         connectsid, apiKey = self.get_api_token()
         if connectsid is False:
+            log.error("Error with get api_key or connect.sid, pageId: {}, user_id: {}".format(pageId,user_id))
             return {'result': 'error'}
         result = requests.get(
-            "https://timify.me/api/v1/~/Page/@id/" +
-            pageId +
-            "/with/Link",
+            "https://quilgo.com/api/v1/~/Link?formId={}&sortBy=createdAt".format(pageId),
             cookies={
                 'connect.sid': connectsid},
             headers={
@@ -448,7 +454,7 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                 courseenrollment__is_active=1
             ).order_by('username').values('id', 'username', 'email')
             datajson = json.loads(result.text)
-            aux_links = datajson["page"]["links"]
+            aux_links = datajson["links"]
             if len(aux_links) > 0:
                 links = {}
                 for link in aux_links:
@@ -498,7 +504,8 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
                     'list_student': list_student}
             else:
                 return {'result': 'error2'}
-
+        else:
+            log.error("Error to get all Links, pageId: {}, userId: {}, response: {}".format(pageId, user_id, result.content))
         return {'result': 'error'}
 
     @XBlock.json_handler
@@ -540,19 +547,24 @@ class EolTimifyXBlock(StudioEditableXBlockMixin, XBlock):
             Get all id form
         """
         connectsid, apiKey = self.get_api_token()
-        list_form = [connectsid, apiKey]
+        list_form = []
         if connectsid is not False:
 
             result = requests.get(
-                "https://timify.me/api/v1/~/Page/all",
+                "https://quilgo.com/api/v1/~/Page/all",
                 cookies={
                     'connect.sid': connectsid},
                 headers={
                     'content-type': 'application/json',
                     "x-api-key": apiKey})
-            data = json.loads(result.text)
-            list_form = [{"display_name": x['label'],
-                          "value": str(x['id'])} for x in data['pages']]
+            if result == 200:
+                data = json.loads(result.text)
+                list_form = [{"display_name": x['label'],
+                            "value": str(x['id'])} for x in data['pages']]
+            else:
+                log.error("Error in get all Forms, api_key: {}, connect.sid: {}, response: {}".format( apiKey, connectsid, result.content))
+        else:
+            log.error("Error with get api token or connect.sid")
         return list_form
 
     def _make_field_info2(self, field_name, field):  # pylint: disable=too-many-statements
